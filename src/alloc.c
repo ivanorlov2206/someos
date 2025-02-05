@@ -6,7 +6,7 @@
 #include "bitmap_phy_alloc.h"
 #include "printk.h"
 
-//#define DEBUG_KALLOC
+#define DEBUG_KALLOC
 
 #ifdef DEBUG_KALLOC
 #define kalloc_debug(fmt, ...) pr_info(fmt, ##__VA_ARGS__)
@@ -77,33 +77,31 @@ static uint64_t bin_ind(uint64_t size)
 static struct block_header *acquire_free_block(uint64_t size)
 {
 	uint64_t bin_i = bin_ind(size);
+	struct block_header *cur = NULL;
 
 	kalloc_debug("Allocating block, size %u bin ind: %u\n", size, bin_i);
-	while (bin_i < BINS_COUNT && (!bins[bin_i] || BLOCK_SIZE(bins[bin_i]) < size)) {
+	while (bin_i < BINS_COUNT) {
+		cur = bins[bin_i];
+		if (cur) {
+			if (cur->size >= size)
+				break;
+			cur = cur->next_in_bin;
+		}
 		bin_i++;
 	};
 
 	if (bin_i == BINS_COUNT)
 		return NULL;
 
-	struct block_header *min_block = bins[bin_i];
-	struct block_header *cur = min_block;
-
-	while (!cur) {
-		if (BLOCK_SIZE(cur) < BLOCK_SIZE(min_block))
-			min_block = cur;
-		cur = cur->next_in_bin;
-	}
-
-	if (min_block->prev_in_bin)
-		min_block->prev_in_bin->next_in_bin = min_block->next_in_bin;
+	if (cur->prev_in_bin)
+		cur->prev_in_bin->next_in_bin = cur->next_in_bin;
 	else
-		bins[bin_i] = min_block->next_in_bin;
+		bins[bin_i] = cur->next_in_bin;
 
-	if (min_block->next_in_bin)
-		min_block->next_in_bin->prev_in_bin = min_block->prev_in_bin;
+	if (cur->next_in_bin)
+		cur->next_in_bin->prev_in_bin = cur->prev_in_bin;
 
-	return min_block;
+	return cur;
 }
 
 static void return_block_to_bin(struct block_header *block)
@@ -132,9 +130,13 @@ static void return_block_to_bin(struct block_header *block)
 		prev = cur_h;
 		cur_h = cur_h->next_in_bin;
 	}
-
-	prev->next_in_bin = block;
-	block->prev_in_bin = prev;
+	
+	if (prev) {
+		prev->next_in_bin = block;
+		block->prev_in_bin = prev;
+	} else {
+		bins[bin_i] = block;
+	}
 	if (cur_h) {
 		cur_h->prev_in_bin = block;
 		block->next_in_bin = cur_h;

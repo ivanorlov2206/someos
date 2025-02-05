@@ -55,9 +55,9 @@ void kernel_main(void)
 	data2 = kalloc(128);
 	pr_info("Allocated data: %x\n", data2);
 
-	for (int i = 0; i < 63; i++) {
-		pr_info("Testing row iteration: %u\n", i);
-	}
+//	for (int i = 0; i < 63; i++) {
+	//	pr_info("Testing row iteration: %u\n", i);
+	//}
 
 	/*asm("mov $0x01, %%eax\n"
 	    "cpuid\n"

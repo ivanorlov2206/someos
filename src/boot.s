@@ -3,7 +3,7 @@
 .set LENGTH, 36
 .set CHECKSUM, -(MAGIC+ARCH+LENGTH)
 
-.section .multiboot
+.section .multiboot.data, "aw"
 .align 8
 .long MAGIC
 .long ARCH
