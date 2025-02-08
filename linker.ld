@@ -2,10 +2,12 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 1M;
-	.text BLOCK(4K) : ALIGN(4K)
-	{
-		*(.multiboot)
+	. = 0x100000;
+	.multiboot.data : {
+		*(.multiboot.data)
+	}
+
+	.text : ALIGN(4K) {
 		*(.text)
 	}
 	.rodata BLOCK(4K) : ALIGN(4K)

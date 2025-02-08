@@ -14,8 +14,8 @@
 .short 5
 .short 0
 .long 20
-.long 0
-.long 0
+.long 640
+.long 480
 .long 0
 
 .section .text

@@ -2,7 +2,7 @@
 #define _SOMELIB_PRINTK
 void printk(char *fmt, ...);
 
-#define pr_info(fmt, ...) printk("%s[i] %n" fmt, ##__VA_ARGS__);
+#define pr_info(fmt, ...) printk("%a[i] %n" fmt, ##__VA_ARGS__);
 #define pr_warn(fmt, ...) printk("%w[w] %n" fmt, ##__VA_ARGS__);
 #define pr_fail(fmt, ...) printk("%f[f] %n" fmt, ##__VA_ARGS__);
 

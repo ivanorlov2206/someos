@@ -69,6 +69,11 @@ void printk(char *fmt, ...)
 				print_signed_num(ds, 10);
 				break;
 			case 's':
+				char *s = va_arg(args, char *);
+				while (*s)
+					global_console->putc(global_console, *s++);
+				break;
+			case 'a':
 				global_console->set_color(global_console, CONSOLE_COLOR_SUCCESS);
 				break;
 			case 'f':

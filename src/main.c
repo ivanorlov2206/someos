@@ -7,6 +7,9 @@
 #include "printk.h"
 #include "multiboot_stuff.h"
 #include "alloc.h"
+#include "pit.h"
+#include "pic.h"
+#include "acpi.h"
 
 /*static void play_w_apic(void)
 {
@@ -45,19 +48,30 @@ void kernel_main(void)
 	void *data3 = kalloc(8);
 	void *data4 = kalloc(16);
 	void *data5 = kalloc(1049);
+	void *data6 = kalloc(4097);
 	pr_info("Allocated data: %x\n", data);
 	pr_info("Allocated data2: %x\n", data2);
 	pr_info("Allocated data3: %x\n", data3);
 	pr_info("Allocated data4: %x\n", data4);
 	pr_info("Allocated data5: %x\n", data5);
+	pr_info("Allocated data5: %x\n", data6);
 	kfree(data);
-	kfree(data2);
+	kfree(data4);
+	kfree(data3);
+	kfree(data5);
 	data2 = kalloc(128);
+	kfree(data6);
 	pr_info("Allocated data: %x\n", data2);
 
-//	for (int i = 0; i < 63; i++) {
-	//	pr_info("Testing row iteration: %u\n", i);
-	//}
+	print_rsdp();
+	while(1);
+	//set_periodic_ticking();
+	//init_pic();
+	//asm("int $0x20");
+	for (int i = 0; i < 128; i++) {
+		pr_info("Testing row iteration: %u\n", i);
+		for(uint64_t j = 0; j < 10000000; j++);
+	}
 
 	/*asm("mov $0x01, %%eax\n"
 	    "cpuid\n"
@@ -72,6 +86,8 @@ void kernel_main(void)
 		printk("APIC is supported\n");
 		play_w_apic();
 	}*/
+
+	while(1);
 
 	asm("hlt");
 }

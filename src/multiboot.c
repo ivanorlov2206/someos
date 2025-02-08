@@ -40,6 +40,9 @@ void read_multiboot_headers(void)
 		case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
 			init_framebuffer((struct multiboot_tag_framebuffer *)h);
 			break;
+		case MULTIBOOT_TAG_TYPE_ACPI_OLD:
+			init_rsdp((struct multiboot_tag_old_acpi *)h);
+			break;
 		}
 
 		h = (struct multiboot_tag *)CEIL8((uint64_t)h + h->size);

@@ -143,6 +143,28 @@ static void return_block_to_bin(struct block_header *block)
 	}
 }
 
+static void validate_bins()
+{
+	uint64_t i;
+	struct block_header *cur;
+
+	for (i = 0; i < BINS_COUNT; i++) {
+		cur = bins[i];
+
+		while (cur) {
+			if (i < 64)
+				bug_on(cur->size != i * 8, "Size of block in bin %u isn't %u", i, i * 8);
+			if (cur->next_in_bin) {
+				bug_on(cur->size > cur->next_in_bin->size, "Size of block (%u) is larger than size of next block %u, bin %u",
+					cur->size, cur->next_in_bin->size, i);
+				bug_on(cur->next_in_bin->prev_in_bin != cur, "Bins validation failed for bin %u\n", i);
+			}
+
+			cur = cur->next_in_bin;
+		}
+	}
+}
+
 void *kalloc(uint64_t size)
 {
 	struct block_header *new_block, *block;
@@ -164,6 +186,7 @@ void *kalloc(uint64_t size)
 	}
 	
 	block->size |= BLOCK_TAKEN;
+	validate_bins();
 
 	return (void *)((uint64_t)block + sizeof(struct block_header));
 }
@@ -176,9 +199,10 @@ static inline bool block_exists(struct block_header *block)
 static void extract_free_block(struct block_header *block)
 {
 	struct block_header *prev = block->prev_in_bin;
+	uint64_t bin_i;
 
 	if (!prev) {
-		int64_t bin_i = bin_ind(block->size);
+		bin_i = bin_ind(block->size);
 		bug_on(bins[bin_i] != block, "Block isn't in the right bin!");
 		bins[bin_i] = block->next_in_bin;
 	} else {
@@ -233,4 +257,5 @@ void kfree(void *addr)
 	block_join_forward(block);
 
 	return_block_to_bin(block);
+	validate_bins();
 }

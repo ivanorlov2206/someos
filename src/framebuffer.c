@@ -315,7 +315,7 @@ static void fb_console_putc(struct console *c, char ch)
 
 	if (f->curr_r >= f->rows) {
 		fb_move_up(f, 1);
-		f->curr_r--;
+		f->curr_r = f->rows - 1;
 		f->curr_c = 0;
 	}
 }
